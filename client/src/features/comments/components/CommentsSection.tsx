@@ -1,6 +1,6 @@
 import { Experience } from "@advanced-react/server/features/experience/models";
 
-import { trpc } from "@/trpc";
+import { trpc } from "@/router";
 
 import { CommentCreateForm } from "./CommentCreateForm";
 import CommentList from "./CommentList";
