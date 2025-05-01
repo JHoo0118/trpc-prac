@@ -3,6 +3,7 @@ import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import { useState } from "react";
 
 import { ExperienceList } from "./features/experiences/components/ExperienceList";
+import { InfiniteScroll } from "./features/shared/components/InfiniteScroll";
 import Navbar from "./features/shared/components/Navbar";
 import { ThemeProvider } from "./features/shared/components/ThemeProvider";
 import { Toaster } from "./features/shared/components/ui/Toaster";
@@ -48,12 +49,23 @@ export function App() {
 }
 
 function Index() {
-  const experiencesQuery = trpc.experiences.feed.useQuery({});
+  const experiencesQuery = trpc.experiences.feed.useInfiniteQuery(
+    {},
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
   return (
-    <ExperienceList
-      experiences={experiencesQuery.data?.experiences ?? []}
-      isLoading={experiencesQuery.isLoading}
-    />
+    <InfiniteScroll onLoadMore={experiencesQuery.fetchNextPage}>
+      <ExperienceList
+        experiences={
+          experiencesQuery.data?.pages.flatMap((page) => page.experiences) ?? []
+        }
+        isLoading={
+          experiencesQuery.isLoading || experiencesQuery.isFetchingNextPage
+        }
+      />
+    </InfiniteScroll>
   );
 }
