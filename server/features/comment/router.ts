@@ -174,9 +174,13 @@ export const commentRouter = router({
       return updatedComments[0];
     }),
 
-  delete: protectedProcedure
+  // delete: protectedProcedure
+  delete: publicProcedure
     .input(z.object({ id: commentSelectSchema.shape.id }))
     .mutation(async ({ ctx, input }) => {
+      // TODO: 제거
+      const userId = 1;
+
       const comment = await db.query.commentsTable.findFirst({
         where: eq(commentsTable.id, input.id),
       });
@@ -193,8 +197,10 @@ export const commentRouter = router({
       });
 
       if (
-        comment.userId !== ctx.user.id &&
-        experience?.userId !== ctx.user.id
+        // comment.userId !== ctx.user.id &&
+        // experience?.userId !== ctx.user.id
+        comment.userId !== userId &&
+        experience?.userId !== userId
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",
