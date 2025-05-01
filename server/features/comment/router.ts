@@ -78,7 +78,8 @@ export const commentRouter = router({
       }));
     }),
 
-  add: protectedProcedure
+  // add: protectedProcedure
+  add: publicProcedure
     .input(
       z.object({
         experienceId: experienceSelectSchema.shape.id,
@@ -86,8 +87,10 @@ export const commentRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const now = new Date().toISOString();
+      // TODO: 제거
+      const userId = 1;
 
+      const now = new Date().toISOString();
       const experience = await db.query.experiencesTable.findFirst({
         where: eq(experiencesTable.id, input.experienceId),
       });
@@ -104,18 +107,21 @@ export const commentRouter = router({
         .values({
           experienceId: input.experienceId,
           content: input.content,
-          userId: ctx.user.id,
+          // userId: ctx.user.id,
+          userId,
           createdAt: now,
           updatedAt: now,
         })
         .returning();
 
-      if (experience.userId !== ctx.user.id) {
+      // if (experience.userId !== ctx.user.id) {
+      if (experience.userId !== userId) {
         await db.insert(notificationsTable).values({
           type: "user_commented_experience",
           commentId: comment[0].id,
           experienceId: input.experienceId,
-          fromUserId: ctx.user.id,
+          // fromUserId: ctx.user.id,
+          fromUserId: userId,
           userId: experience.userId,
           createdAt: now,
         });
