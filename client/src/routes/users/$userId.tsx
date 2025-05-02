@@ -2,11 +2,13 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { MartiniIcon } from "lucide-react";
 import { z } from "zod";
 
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { ExperienceList } from "@/features/experiences/components/ExperienceList";
 import { ErrorComponent } from "@/features/shared/components/ErrorComponent";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import Card from "@/features/shared/components/ui/Card";
 import { UserAvatar } from "@/features/users/components/UserAvatar";
+import { UserEditDialog } from "@/features/users/components/UserEditDialog";
 import { UserForDetails } from "@/features/users/types";
 import { isTRPCClientError, trpc } from "@/router";
 
@@ -56,6 +58,7 @@ function UserPage() {
         {user.bio && (
           <p className="text-neutral-600 dark:text-neutral-400">{user.bio}</p>
         )}
+        <UserProfileButton user={user} />
       </Card>
 
       <UserProfileHostStats user={user} />
@@ -90,4 +93,19 @@ function UserProfileHostStats({ user }: UserProfileHostStatsProps) {
       </div>
     </Card>
   );
+}
+
+type UserProfileButtonProps = {
+  user: UserForDetails;
+};
+
+function UserProfileButton({ user }: UserProfileButtonProps) {
+  const { currentUser } = useCurrentUser();
+  const isCurrentUser = currentUser?.id === user.id;
+
+  if (isCurrentUser) {
+    return <UserEditDialog user={user} />;
+  }
+
+  return null;
 }

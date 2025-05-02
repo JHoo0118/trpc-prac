@@ -6,6 +6,9 @@ import {
   createTRPCReact,
   getQueryKey,
   httpBatchLink,
+  httpLink,
+  isNonJsonSerializable,
+  splitLink,
   TRPCClientError,
   TRPCLink,
 } from "@trpc/react-query";
@@ -77,20 +80,46 @@ function getHeaders() {
 // customLink: 에러 처리(특히 UNAUTHORIZED)를 담당.
 // httpBatchLink: 실제 서버로 HTTP 요청을 보내는 링크. getHeaders로 생성된 인증 헤더와 credentials: "include"를 포함해 요청을 보냅니다.
 // 흐름: 클라이언트 요청 → customLink (에러 처리) → httpBatchLink (서버 요청).
+// httpLink 단일 요청당 1 HTTP 요청
+// httpBatchLink 여러 요청을 1 HTTP 요청으로 배치 처리
+// splitLink 입력 데이터의 특성에 따라 요청을 다른 링크로 분기
 export const trpcClient = trpc.createClient({
   links: [
+    // customLink: 에러 처리(예: UNAUTHORIZED 시 로그인 페이지로 리다이렉트)를 위한 커스텀 링크
     customLink,
-    httpBatchLink({
-      url: env.VITE_SERVER_BASE_URL,
-      // fetch 옵션 설정
-      // credentials를 include로 설정하여 쿠키를 포함
-      fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          credentials: "include",
-        });
+    // splitLink: 입력 데이터의 특성에 따라 요청을 다른 링크로 분기
+    splitLink({
+      // condition: 입력 데이터가 JSON 직렬화 불가능한지 확인
+      // 예: File, FormData 같은 객체는 JSON으로 직렬화할 수 없음
+      condition(op) {
+        return isNonJsonSerializable(op.input);
       },
-      headers: getHeaders(),
+      // true: JSON 직렬화 불가능한 경우, 단일 HTTP 요청을 보내는 httpLink 사용
+      true: httpLink({
+        url: env.VITE_SERVER_BASE_URL, // 서버의 기본 URL
+        // fetch: HTTP 요청 커스터마이징, 쿠키 포함을 위해 credentials: "include" 설정
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: "include", // 인증 쿠키/세션 포함
+          });
+        },
+        // headers: Authorization 헤더에 Bearer 토큰 추가 (getHeaders에서 생성)
+        headers: getHeaders(),
+      }),
+      // false: JSON 직렬화 가능한 경우, 여러 요청을 배치 처리하는 httpBatchLink 사용
+      false: httpBatchLink({
+        url: env.VITE_SERVER_BASE_URL, // 서버의 기본 URL
+        // fetch: HTTP 요청 커스터마이징, 쿠키 포함
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+          });
+        },
+        // headers: Authorization 헤더에 Bearer 토큰 추가
+        headers: getHeaders(),
+      }),
     }),
   ],
 });
