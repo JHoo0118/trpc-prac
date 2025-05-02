@@ -1,6 +1,7 @@
 import { Experience } from "@advanced-react/server/features/experience/models";
 
 import { ErrorComponent } from "@/features/shared/components/ErrorComponent";
+import Card from "@/features/shared/components/ui/Card";
 import { trpc } from "@/router";
 
 import { CommentCreateForm } from "./CommentCreateForm";
@@ -29,7 +30,9 @@ export function CommentsSection({
   return (
     <div className="space-y-4">
       <h3 className="font-semibold">Comments ({commentsCount})</h3>
-      <CommentCreateForm experienceId={experienceId} />
+      <Card>
+        <CommentCreateForm experienceId={experienceId} />
+      </Card>
       <CommentList
         comments={commentsQuery.data ?? []}
         isLoading={commentsQuery.isLoading}
