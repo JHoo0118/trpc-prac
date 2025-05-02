@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/features/shared/components/ui/Dialog";
+import FileInput from "@/features/shared/components/ui/FileInput";
 import {
   Form,
   FormControl,
@@ -115,6 +116,25 @@ export function UserEditDialog({ user }: UserEditDialogProps) {
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
                     <TextArea {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="photo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <FormControl>
+                    <FileInput
+                      accept="image/*"
+                      onChange={(event) => {
+                        field.onChange(event.target?.files?.[0]);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
