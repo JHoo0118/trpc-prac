@@ -138,6 +138,16 @@ export const authRouter = router({
       return { accessToken: ctx.accessToken, currentUser: cleanUser };
     }),
 
+  // ctx는 tRPC 요청의 컨텍스트로, 서버에서 프로시저를 실행할 때 필요한 추가 정보(예: 사용자 정보, 요청 메타데이터)를 포함합니다.
+  // input은 클라이언트가 프로시저에 전달한 입력 데이터
+  // ctx = {
+  //   user: {
+  //     password: "$2b$10$...", // 해시된 비밀번호
+  //     email: "old@example.com",
+  //   },
+  //   req: { ... }, // HTTP 요청 객체
+  //   db: { ... }, // Drizzle DB 인스턴스
+  // };
   changeEmail: protectedProcedure
     .input(changeEmailSchema)
     .mutation(async ({ ctx, input }) => {
