@@ -1,4 +1,4 @@
-import { changeEmailSchema } from "@advanced-react/shared/schema/auth";
+import { changePasswordSchema } from "@advanced-react/shared/schema/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -25,23 +25,23 @@ import Input from "@/features/shared/components/ui/Input";
 import { useToast } from "@/features/shared/hooks/useToast";
 import { trpc } from "@/router";
 
-type ChangeEmailFormData = z.infer<typeof changeEmailSchema>;
+type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-export function ChangeEmailDialog() {
+export function ChangePasswordDialog() {
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<ChangeEmailFormData>({
-    resolver: zodResolver(changeEmailSchema),
+  const form = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      currentPassword: "",
+      newPassword: "",
     },
   });
 
-  const changeEmailMutation = trpc.auth.changeEmail.useMutation({
+  const changePasswordMutation = trpc.auth.changePassword.useMutation({
     onSuccess: async () => {
       await utils.auth.currentUser.invalidate();
 
@@ -50,13 +50,13 @@ export function ChangeEmailDialog() {
       setIsOpen(false);
 
       toast({
-        title: "Email changed",
-        description: "Your email has been changed",
+        title: "Password changed",
+        description: "Your password has been changed",
       });
     },
     onError: (error) => {
       toast({
-        title: "Failed to change email",
+        title: "Failed to change password",
         description: error.message,
         variant: "destructive",
       });
@@ -64,41 +64,23 @@ export function ChangeEmailDialog() {
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    changeEmailMutation.mutate(data);
+    changePasswordMutation.mutate(data);
   });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Update Email</Button>
+        <Button>Update Password</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Email</DialogTitle>
+          <DialogTitle>Change Password</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormField
               control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>New Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      {...field}
-                      placeholder="example@email.com"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
+              name="currentPassword"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Current Password</FormLabel>
@@ -110,9 +92,25 @@ export function ChangeEmailDialog() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} placeholder="********" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
-              <Button type="submit" disabled={changeEmailMutation.isPending}>
-                {changeEmailMutation.isPending ? "Loading..." : "Change Email"}
+              <Button type="submit" disabled={changePasswordMutation.isPending}>
+                {changePasswordMutation.isPending
+                  ? "Loading..."
+                  : "Change Password"}
               </Button>
             </DialogFooter>
           </form>

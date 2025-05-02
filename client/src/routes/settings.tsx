@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { ChangeEmailDialog } from "@/features/auth/components/ChangeEmailDialog";
+import { ChangePasswordDialog } from "@/features/auth/components/ChangePasswordDialog";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { Button } from "@/features/shared/components/ui/Button";
 import Card from "@/features/shared/components/ui/Card";
@@ -47,6 +48,10 @@ function SettingsPage() {
     {
       label: currentUser?.email,
       component: <ChangeEmailDialog />,
+    },
+    {
+      label: "Change password",
+      component: <ChangePasswordDialog />,
     },
     {
       label: "Sign out of your account",
