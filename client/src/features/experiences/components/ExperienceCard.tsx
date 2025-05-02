@@ -7,6 +7,7 @@ import Link from "@/features/shared/components/ui/Link";
 import { UserAvatar } from "@/features/users/components/UserAvatar";
 
 import { ExperienceForList } from "../types";
+import { ExperienceAttendButton } from "./ExperienceAttendButton";
 import { ExperienceDeleteDialog } from "./ExperienceDeleteDialog";
 
 type ExperienceCardProps = {
@@ -144,6 +145,15 @@ function ExperienceCardActionButtons({
 
   if (isPostOwner) {
     return <ExperienceCardOwnerButtons experience={experience} />;
+  }
+
+  if (currentUser) {
+    return (
+      <ExperienceAttendButton
+        experienceId={experience.id}
+        isAttending={experience.isAttending}
+      />
+    );
   }
 
   return null;

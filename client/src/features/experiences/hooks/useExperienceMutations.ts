@@ -68,8 +68,263 @@ export function useExperienceMutations(
     },
   });
 
+  const attendMutation = trpc.experiences.attend.useMutation({
+    onMutate: async ({ id }) => {
+      function updateExperience<
+        T extends {
+          isAttending: boolean;
+        },
+      >(oldData: T) {
+        return {
+          ...oldData,
+          isAttending: true,
+        };
+      }
+
+      await Promise.all([
+        utils.experiences.byId.cancel({ id }),
+        utils.experiences.feed.cancel(),
+        ...(pathUserId
+          ? [utils.experiences.byUserId.cancel({ id: pathUserId })]
+          : []),
+        ...(pathQ ? [utils.experiences.search.cancel({ q: pathQ })] : []),
+      ]);
+
+      const previousData = {
+        byId: utils.experiences.byId.getData({ id }),
+        feed: utils.experiences.feed.getInfiniteData(),
+        byUserId: pathUserId
+          ? utils.experiences.byUserId.getInfiniteData({ id: pathUserId })
+          : undefined,
+        search: pathQ
+          ? utils.experiences.search.getInfiniteData({
+              q: pathQ,
+            })
+          : undefined,
+      };
+
+      utils.experiences.byId.setData({ id }, (oldData) => {
+        if (!oldData) {
+          return;
+        }
+
+        return updateExperience(oldData);
+      });
+
+      utils.experiences.feed.setInfiniteData({}, (oldData) => {
+        if (!oldData) {
+          return;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            experiences: page.experiences.map((e) =>
+              e.id === id ? updateExperience(e) : e,
+            ),
+          })),
+        };
+      });
+
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          (oldData) => {
+            if (!oldData) {
+              return;
+            }
+
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) => ({
+                ...page,
+                experiences: page.experiences.map((e) =>
+                  e.id === id ? updateExperience(e) : e,
+                ),
+              })),
+            };
+          },
+        );
+      }
+
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData({ q: pathQ }, (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              experiences: page.experiences.map((e) =>
+                e.id === id ? updateExperience(e) : e,
+              ),
+            })),
+          };
+        });
+      }
+
+      return { previousData };
+    },
+    onError: (error, { id }, context) => {
+      utils.experiences.byId.setData({ id }, context?.previousData.byId);
+
+      utils.experiences.feed.setInfiniteData({}, context?.previousData.feed);
+
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          context?.previousData.byUserId,
+        );
+      }
+
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData(
+          { q: pathQ },
+          context?.previousData.search,
+        );
+      }
+
+      toast({
+        title: "Failed to attend experience",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const unattendMutation = trpc.experiences.unattend.useMutation({
+    onMutate: async ({ id }) => {
+      function updateExperience<
+        T extends {
+          isAttending: boolean;
+        },
+      >(oldData: T) {
+        return {
+          ...oldData,
+          isAttending: false,
+        };
+      }
+
+      await Promise.all([
+        utils.experiences.byId.cancel({ id }),
+        utils.experiences.feed.cancel(),
+        ...(pathUserId
+          ? [utils.experiences.byUserId.cancel({ id: pathUserId })]
+          : []),
+        ...(pathQ ? [utils.experiences.search.cancel({ q: pathQ })] : []),
+      ]);
+
+      const previousData = {
+        byId: utils.experiences.byId.getData({ id }),
+        feed: utils.experiences.feed.getInfiniteData(),
+        byUserId: pathUserId
+          ? utils.experiences.byUserId.getInfiniteData({ id: pathUserId })
+          : undefined,
+        search: pathQ
+          ? utils.experiences.search.getInfiniteData({
+              q: pathQ,
+            })
+          : undefined,
+      };
+
+      utils.experiences.byId.setData({ id }, (oldData) => {
+        if (!oldData) {
+          return;
+        }
+
+        return updateExperience(oldData);
+      });
+
+      utils.experiences.feed.setInfiniteData({}, (oldData) => {
+        if (!oldData) {
+          return;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            experiences: page.experiences.map((e) =>
+              e.id === id ? updateExperience(e) : e,
+            ),
+          })),
+        };
+      });
+
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          (oldData) => {
+            if (!oldData) {
+              return;
+            }
+
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) => ({
+                ...page,
+                experiences: page.experiences.map((e) =>
+                  e.id === id ? updateExperience(e) : e,
+                ),
+              })),
+            };
+          },
+        );
+      }
+
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData({ q: pathQ }, (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              experiences: page.experiences.map((e) =>
+                e.id === id ? updateExperience(e) : e,
+              ),
+            })),
+          };
+        });
+      }
+
+      return { previousData };
+    },
+    onError: (error, { id }, context) => {
+      utils.experiences.byId.setData({ id }, context?.previousData.byId);
+
+      utils.experiences.feed.setInfiniteData({}, context?.previousData.feed);
+
+      if (pathUserId) {
+        utils.experiences.byUserId.setInfiniteData(
+          { id: pathUserId },
+          context?.previousData.byUserId,
+        );
+      }
+
+      if (pathQ) {
+        utils.experiences.search.setInfiniteData(
+          { q: pathQ },
+          context?.previousData.search,
+        );
+      }
+
+      toast({
+        title: "Failed to attend experience",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     editMutation,
     deleteMutation,
+    attendMutation,
+    unattendMutation,
   };
 }
