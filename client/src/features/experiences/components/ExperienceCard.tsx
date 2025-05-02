@@ -129,7 +129,6 @@ function ExperienceCardMetricButtons({
           <span>{experience.commentsCount}</span>
         </Link>
       </Button>
-      <ExperienceDeleteDialog experience={experience} />
     </div>
   );
 }
@@ -165,6 +164,7 @@ function ExperienceCardOwnerButtons({
           Edit
         </Link>
       </Button>
+      <ExperienceDeleteDialog experience={experience} />
     </div>
   );
 }
