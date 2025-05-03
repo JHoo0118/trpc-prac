@@ -17,13 +17,15 @@ import { TextArea } from "@/features/shared/components/ui/TextArea";
 import { useToast } from "@/features/shared/hooks/useToast";
 import { trpc } from "@/router";
 
+import { CommentOptimistic } from "../types";
+
 type CommentCreateFormData = z.infer<typeof commentValidationSchema>;
 
 type CommentCreateFormProps = {
-  experienceId: Experience["id"];
+  experience: Experience;
 };
 
-export function CommentCreateForm({ experienceId }: CommentCreateFormProps) {
+export function CommentCreateForm({ experience }: CommentCreateFormProps) {
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const { currentUser } = useCurrentUser();
@@ -36,21 +38,89 @@ export function CommentCreateForm({ experienceId }: CommentCreateFormProps) {
   });
 
   const addCommentMutation = trpc.comments.add.useMutation({
-    onSuccess: async ({ experienceId }) => {
-      await Promise.all([
-        utils.comments.byExperienceId.invalidate({
-          experienceId,
-        }),
-        utils.experiences.feed.invalidate({}),
-      ]);
+    onMutate: async ({ content, experienceId }) => {
+      if (!currentUser) {
+        return;
+      }
 
       form.reset();
 
-      toast({
-        title: "Comment added successfully",
+      await Promise.all([
+        utils.comments.byExperienceId.cancel({
+          experienceId,
+        }),
+        utils.experiences.byId.cancel({
+          id: experienceId,
+        }),
+      ]);
+
+      const previousData = {
+        byExperienceId: utils.comments.byExperienceId.getData({
+          experienceId,
+        }),
+        experienceById: utils.experiences.byId.getData({ id: experienceId }),
+      };
+
+      const optimisticComment: CommentOptimistic = {
+        id: Math.random(),
+        optimistic: true,
+        content: content,
+        experienceId,
+        experience,
+        userId: currentUser.id,
+        user: currentUser,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      utils.comments.byExperienceId.setData(
+        { experienceId: experience.id },
+        // @ts-expect-error - TODO: Fix when implementing liking comments
+        (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return [optimisticComment, ...oldData];
+        },
+      );
+
+      utils.experiences.byId.setData({ id: experience.id }, (oldData) => {
+        if (!oldData) {
+          return;
+        }
+
+        return {
+          ...oldData,
+          commentsCount: oldData.commentsCount + 1,
+        };
+      });
+
+      const { dismiss } = toast({
+        title: "Comment added",
+        description: "Your comment has been added",
+      });
+
+      return { dismiss, previousData };
+    },
+    onSuccess: async ({ experienceId }) => {
+      await utils.comments.byExperienceId.invalidate({
+        experienceId,
       });
     },
-    onError: (error) => {
+    onError: (error, { experienceId }, context) => {
+      context?.dismiss?.();
+
+      utils.comments.byExperienceId.setData(
+        { experienceId },
+        context?.previousData.byExperienceId,
+      );
+
+      utils.experiences.byId.setData(
+        { id: experienceId },
+        context?.previousData.experienceById,
+      );
+
       toast({
         title: "Failed to add comment",
         description: error.message,
@@ -62,7 +132,7 @@ export function CommentCreateForm({ experienceId }: CommentCreateFormProps) {
   const handleSubmit = form.handleSubmit((data) => {
     addCommentMutation.mutate({
       content: data.content,
-      experienceId,
+      experienceId: experience.id,
     });
   });
   if (!currentUser) {
