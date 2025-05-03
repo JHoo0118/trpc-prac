@@ -39,18 +39,49 @@ export function CommentEditForm({
   });
 
   const editMutation = trpc.comments.edit.useMutation({
-    onSuccess: async ({ experienceId }) => {
-      await utils.comments.byExperienceId.invalidate({
-        experienceId,
-      });
-
+    onMutate: async ({ id, content }) => {
       setIsEditing(false);
 
-      toast({
-        title: "Comment edited successfully",
+      await utils.comments.byExperienceId.cancel({
+        experienceId: comment.experienceId,
       });
+
+      const previousData = {
+        byExperienceId: utils.comments.byExperienceId.getData({
+          experienceId: comment.experienceId,
+        }),
+      };
+
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return oldData.map((comment) =>
+            comment.id === id
+              ? { ...comment, content, updatedAt: new Date().toISOString() }
+              : comment,
+          );
+        },
+      );
+
+      const { dismiss } = toast({
+        title: "Comment updated",
+        description: "Your comment has been updated",
+      });
+
+      return { dismiss, previousData };
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      context?.dismiss?.();
+
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        context?.previousData.byExperienceId,
+      );
+
       toast({
         title: "Failed to edit comment",
         description: error.message,
