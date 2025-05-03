@@ -7,12 +7,13 @@ import { ExperienceList } from "@/features/experiences/components/ExperienceList
 import { ErrorComponent } from "@/features/shared/components/ErrorComponent";
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import Card from "@/features/shared/components/ui/Card";
+import Link from "@/features/shared/components/ui/Link";
 import { UserAvatar } from "@/features/users/components/UserAvatar";
 import { UserEditDialog } from "@/features/users/components/UserEditDialog";
 import { UserForDetails } from "@/features/users/types";
 import { isTRPCClientError, trpc } from "@/router";
 
-export const Route = createFileRoute("/users/$userId")({
+export const Route = createFileRoute("/users/$userId/")({
   params: {
     parse: (params) => ({
       userId: z.coerce.number().parse(params.userId),
@@ -58,6 +59,7 @@ function UserPage() {
         {user.bio && (
           <p className="text-neutral-600 dark:text-neutral-400">{user.bio}</p>
         )}
+        <UserProfileStats user={user} />
         <UserProfileButton user={user} />
       </Card>
 
@@ -79,19 +81,49 @@ function UserPage() {
   );
 }
 
-type UserProfileHostStatsProps = {
+type UserProfileStatsProps = {
   user: UserForDetails;
 };
 
-function UserProfileHostStats({ user }: UserProfileHostStatsProps) {
+function UserProfileStats({ user }: UserProfileStatsProps) {
+  const stats = [
+    {
+      label: "Followers",
+      value: user.followersCount,
+      to: `/users/$userId/followers`,
+      params: {
+        userId: user.id,
+      },
+    },
+    {
+      label: "Following",
+      value: user.followingCount,
+      to: `/users/$userId/following`,
+      params: {
+        userId: user.id,
+      },
+    },
+  ] as const;
+
   return (
-    <Card className="space-y-2">
-      <h3 className="text-center text-lg font-semibold">Host Stats</h3>
-      <div className="flex flex-row items-center justify-center gap-2 text-neutral-600 dark:text-neutral-400">
-        <MartiniIcon className="h-5 w-5" />
-        {user.hostedExperiencesCount}
-      </div>
-    </Card>
+    <div className="flex w-full justify-center gap-12 border-y-2 border-neutral-200 py-4 dark:border-neutral-800">
+      {stats.map((stat) => (
+        <Link
+          key={stat.label}
+          to={stat.to}
+          params={stat.params}
+          variant="ghost"
+          className="text-center"
+        >
+          <div className="dark:text-primary-500 text-secondary-500 text-center text-2xl font-bold">
+            {stat.value}
+          </div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">
+            {stat.label}
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 
@@ -108,4 +140,20 @@ function UserProfileButton({ user }: UserProfileButtonProps) {
   }
 
   return null;
+}
+
+type UserProfileHostStatsProps = {
+  user: UserForDetails;
+};
+
+function UserProfileHostStats({ user }: UserProfileHostStatsProps) {
+  return (
+    <Card className="space-y-2">
+      <h3 className="text-center text-lg font-semibold">Host Stats</h3>
+      <div className="flex flex-row items-center justify-center gap-2 text-neutral-600 dark:text-neutral-400">
+        <MartiniIcon className="h-5 w-5" />
+        {user.hostedExperiencesCount}
+      </div>
+    </Card>
+  );
 }
