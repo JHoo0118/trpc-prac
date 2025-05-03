@@ -18,6 +18,7 @@ import { trpc } from "@/router";
 
 import { CommentForList, CommentOptimistic } from "../types";
 import { CommentEditForm } from "./CommentEditForm";
+import { CommentLikeButton } from "./CommentLikeButton";
 
 type CommentCardProps = {
   comment: CommentForList;
@@ -34,6 +35,7 @@ export function CommentCard({ comment }: CommentCardProps) {
     <Card className="space-y-4">
       <CommentCardHeader comment={comment} />
       <CommentCardContent comment={comment} />
+      <CommentCardMetricButtons comment={comment} />
       <CommentCardButtons comment={comment} setIsEditing={setIsEditing} />
     </Card>
   );
@@ -58,6 +60,19 @@ type CommentCardContentProps = Pick<CommentCardProps, "comment">;
 
 function CommentCardContent({ comment }: CommentCardContentProps) {
   return <p>{comment.content}</p>;
+}
+
+type CommentCardMetricButtonsProps = Pick<CommentCardProps, "comment">;
+
+function CommentCardMetricButtons({ comment }: CommentCardMetricButtonsProps) {
+  return (
+    <CommentLikeButton
+      commentId={comment.id}
+      isLiked={comment.isLiked}
+      likesCount={comment.likesCount}
+      disabled={(comment as CommentOptimistic).optimistic}
+    />
+  );
 }
 
 type CommentCardButtonsProps = Pick<CommentCardProps, "comment"> & {
