@@ -20,7 +20,7 @@ export const Route = createFileRoute("/experiences/$experienceId/attendees")({
         trpcQueryUtils.experiences.byId.ensureData({
           id: params.experienceId,
         }),
-        trpcQueryUtils.users.experienceAttendees.prefetchInfinite({
+        trpcQueryUtils.users.experienceAttendees.fetchInfinite({
           experienceId: params.experienceId,
         }),
       ]);
