@@ -15,6 +15,7 @@ import { Route as SettingsImport } from './routes/settings'
 import { Route as SearchImport } from './routes/search'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
+import { Route as FavoritesImport } from './routes/favorites'
 import { Route as IndexImport } from './routes/index'
 import { Route as NotificationsIndexImport } from './routes/notifications/index'
 import { Route as UsersUserIdIndexImport } from './routes/users/$userId/index'
@@ -47,6 +48,12 @@ const RegisterRoute = RegisterImport.update({
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FavoritesRoute = FavoritesImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -110,6 +117,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -196,6 +210,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -211,6 +226,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -227,6 +243,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -244,6 +261,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/favorites'
     | '/login'
     | '/register'
     | '/search'
@@ -258,6 +276,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/favorites'
     | '/login'
     | '/register'
     | '/search'
@@ -272,6 +291,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/favorites'
     | '/login'
     | '/register'
     | '/search'
@@ -288,6 +308,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FavoritesRoute: typeof FavoritesRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
@@ -303,6 +324,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FavoritesRoute: FavoritesRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
@@ -327,6 +349,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/favorites",
         "/login",
         "/register",
         "/search",
@@ -342,6 +365,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/favorites": {
+      "filePath": "favorites.tsx"
     },
     "/login": {
       "filePath": "login.tsx"
