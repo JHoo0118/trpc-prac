@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { LocationPicker } from "@/features/shared/components/LocationPicker";
 import { Button } from "@/features/shared/components/ui/Button";
 import FileInput from "@/features/shared/components/ui/FileInput";
 import {
@@ -126,6 +127,20 @@ export function ExperienceForm({
                     field.onChange(event.target?.files?.[0]);
                   }}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <LocationPicker {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
