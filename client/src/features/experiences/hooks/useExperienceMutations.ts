@@ -6,6 +6,9 @@ import { useToast } from "@/features/shared/hooks/useToast";
 import { trpc } from "@/router";
 
 type ExperienceMutationsOptions = {
+  add?: {
+    onSuccess?: (id: Experience["id"]) => void;
+  };
   edit?: {
     onSuccess?: (id: Experience["id"]) => void;
   };
@@ -27,6 +30,24 @@ export function useExperienceMutations(
   const { q: pathQ } = useSearch({ strict: false });
   const { tags: pathTags } = useSearch({ strict: false });
   const { scheduledAt: pathScheduledAt } = useSearch({ strict: false });
+
+  const addMutation = trpc.experiences.add.useMutation({
+    onSuccess: ({ id }) => {
+      toast({
+        title: "Experience created",
+        description: "Your experience has been created",
+      });
+
+      options.add?.onSuccess?.(id);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to create experience",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const editMutation = trpc.experiences.edit.useMutation({
     onSuccess: async ({ id }) => {
@@ -870,6 +891,7 @@ export function useExperienceMutations(
   });
 
   return {
+    addMutation,
     editMutation,
     deleteMutation,
     attendMutation,

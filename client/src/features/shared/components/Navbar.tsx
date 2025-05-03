@@ -1,10 +1,11 @@
-import { Bell, Heart, Home, Search, Settings, User } from "lucide-react";
+import { Bell, Edit, Heart, Home, Search, Settings, User } from "lucide-react";
 
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { cn } from "@/lib/utils/cn";
 import { trpc } from "@/router";
 
 import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "./ui/Button";
 import Link from "./ui/Link";
 
 export default function Navigation() {
@@ -108,6 +109,14 @@ export default function Navigation() {
       )}
 
       <ThemeToggle />
+      {currentUser && (
+        <Button asChild>
+          <Link to="/experiences/new" variant="ghost">
+            <Edit className="h-6 w-6" />
+            Create Experience
+          </Link>
+        </Button>
+      )}
     </nav>
   );
 }

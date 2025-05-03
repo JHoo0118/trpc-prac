@@ -121,6 +121,7 @@ export const experienceRouter = router({
       const experiences = await db.query.experiencesTable.findMany({
         limit,
         offset: cursor,
+        orderBy: desc(experiencesTable.createdAt),
         with: {
           user: {
             columns: {
@@ -480,7 +481,7 @@ export const experienceRouter = router({
         imagePath = await writeFile(input.image);
       }
 
-      return await db
+      const experience = await db
         .insert(experiencesTable)
         .values({
           title: input.title,
@@ -494,6 +495,8 @@ export const experienceRouter = router({
           updatedAt: new Date().toISOString(),
         })
         .returning();
+
+      return experience[0];
     }),
 
   edit: protectedProcedure
