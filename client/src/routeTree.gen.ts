@@ -19,6 +19,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as UsersUserIdImport } from './routes/users/$userId'
 import { Route as ExperiencesExperienceIdIndexImport } from './routes/experiences/$experienceId/index'
 import { Route as ExperiencesExperienceIdEditImport } from './routes/experiences/$experienceId/edit'
+import { Route as ExperiencesExperienceIdAttendeesImport } from './routes/experiences/$experienceId/attendees'
 
 // Create/Update Routes
 
@@ -72,6 +73,13 @@ const ExperiencesExperienceIdEditRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const ExperiencesExperienceIdAttendeesRoute =
+  ExperiencesExperienceIdAttendeesImport.update({
+    id: '/experiences/$experienceId/attendees',
+    path: '/experiences/$experienceId/attendees',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -118,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersUserIdImport
       parentRoute: typeof rootRoute
     }
+    '/experiences/$experienceId/attendees': {
+      id: '/experiences/$experienceId/attendees'
+      path: '/experiences/$experienceId/attendees'
+      fullPath: '/experiences/$experienceId/attendees'
+      preLoaderRoute: typeof ExperiencesExperienceIdAttendeesImport
+      parentRoute: typeof rootRoute
+    }
     '/experiences/$experienceId/edit': {
       id: '/experiences/$experienceId/edit'
       path: '/experiences/$experienceId/edit'
@@ -144,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/experiences/$experienceId/attendees': typeof ExperiencesExperienceIdAttendeesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
   '/experiences/$experienceId': typeof ExperiencesExperienceIdIndexRoute
 }
@@ -155,6 +171,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/experiences/$experienceId/attendees': typeof ExperiencesExperienceIdAttendeesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
   '/experiences/$experienceId': typeof ExperiencesExperienceIdIndexRoute
 }
@@ -167,6 +184,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/experiences/$experienceId/attendees': typeof ExperiencesExperienceIdAttendeesRoute
   '/experiences/$experienceId/edit': typeof ExperiencesExperienceIdEditRoute
   '/experiences/$experienceId/': typeof ExperiencesExperienceIdIndexRoute
 }
@@ -180,6 +198,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/users/$userId'
+    | '/experiences/$experienceId/attendees'
     | '/experiences/$experienceId/edit'
     | '/experiences/$experienceId'
   fileRoutesByTo: FileRoutesByTo
@@ -190,6 +209,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/users/$userId'
+    | '/experiences/$experienceId/attendees'
     | '/experiences/$experienceId/edit'
     | '/experiences/$experienceId'
   id:
@@ -200,6 +220,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/users/$userId'
+    | '/experiences/$experienceId/attendees'
     | '/experiences/$experienceId/edit'
     | '/experiences/$experienceId/'
   fileRoutesById: FileRoutesById
@@ -212,6 +233,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   UsersUserIdRoute: typeof UsersUserIdRoute
+  ExperiencesExperienceIdAttendeesRoute: typeof ExperiencesExperienceIdAttendeesRoute
   ExperiencesExperienceIdEditRoute: typeof ExperiencesExperienceIdEditRoute
   ExperiencesExperienceIdIndexRoute: typeof ExperiencesExperienceIdIndexRoute
 }
@@ -223,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   UsersUserIdRoute: UsersUserIdRoute,
+  ExperiencesExperienceIdAttendeesRoute: ExperiencesExperienceIdAttendeesRoute,
   ExperiencesExperienceIdEditRoute: ExperiencesExperienceIdEditRoute,
   ExperiencesExperienceIdIndexRoute: ExperiencesExperienceIdIndexRoute,
 }
@@ -243,6 +266,7 @@ export const routeTree = rootRoute
         "/search",
         "/settings",
         "/users/$userId",
+        "/experiences/$experienceId/attendees",
         "/experiences/$experienceId/edit",
         "/experiences/$experienceId/"
       ]
@@ -264,6 +288,9 @@ export const routeTree = rootRoute
     },
     "/users/$userId": {
       "filePath": "users/$userId.tsx"
+    },
+    "/experiences/$experienceId/attendees": {
+      "filePath": "experiences/$experienceId/attendees.tsx"
     },
     "/experiences/$experienceId/edit": {
       "filePath": "experiences/$experienceId/edit.tsx"
