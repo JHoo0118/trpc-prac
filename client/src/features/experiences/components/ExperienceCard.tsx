@@ -4,6 +4,7 @@ import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { Button } from "@/features/shared/components/ui/Button";
 import Card from "@/features/shared/components/ui/Card";
 import Link from "@/features/shared/components/ui/Link";
+import TagList from "@/features/tags/components/TagList";
 import { UserAvatar } from "@/features/users/components/UserAvatar";
 
 import { ExperienceForList } from "../types";
@@ -24,6 +25,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         <div className="w-full space-y-4">
           <ExperienceCardHeader experience={experience} />
           <ExperienceCardContent experience={experience} />
+          <ExperienceCardTags experience={experience} />
           <ExperienceCardMeta experience={experience} />
           <ExperienceCardMetricButtons experience={experience} />
           <ExperienceCardActionButtons experience={experience} />
@@ -87,6 +89,12 @@ type ExperienceCardContentProps = Pick<ExperienceCardProps, "experience">;
 
 function ExperienceCardContent({ experience }: ExperienceCardContentProps) {
   return <p>{experience.content}</p>;
+}
+
+type ExperienceCardTagsProps = Pick<ExperienceCardProps, "experience">;
+
+function ExperienceCardTags({ experience }: ExperienceCardTagsProps) {
+  return <TagList tags={experience.tags} />;
 }
 
 type ExperienceCardMetaProps = Pick<ExperienceCardProps, "experience">;

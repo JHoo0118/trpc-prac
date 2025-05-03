@@ -1,3 +1,4 @@
+import { Tag } from "@advanced-react/server/database/schema";
 import {
   ExperienceFilterParams,
   experienceFiltersSchema,
@@ -16,15 +17,18 @@ import {
   FormMessage,
 } from "@/features/shared/components/ui/Form";
 import Input from "@/features/shared/components/ui/Input";
+import { MultiSelect } from "@/features/shared/components/ui/MultiSelect";
 
 type ExperienceFiltersProps = {
   onFiltersChange: (filters: ExperienceFilterParams) => void;
   initialFilters?: ExperienceFilterParams;
+  tags: Tag[];
 };
 
 export function ExperienceFilters({
   onFiltersChange,
   initialFilters,
+  tags,
 }: ExperienceFiltersProps) {
   const form = useForm<ExperienceFilterParams>({
     resolver: zodResolver(experienceFiltersSchema),
@@ -36,6 +40,10 @@ export function ExperienceFilters({
 
     if (values.q?.trim()) {
       filters.q = values.q.trim();
+    }
+
+    if (values.tags) {
+      filters.tags = values.tags;
     }
 
     onFiltersChange(filters);
@@ -63,6 +71,23 @@ export function ExperienceFilters({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <MultiSelect
+                options={tags.map((tag) => ({
+                  value: tag.id.toString(),
+                  label: tag.name,
+                }))}
+                onValueChange={(tags) => {
+                  field.onChange(tags.map(Number));
+                }}
+                defaultValue={field.value?.map((tag) => tag.toString())}
+                placeholder="Select tags..."
+              />
+            )}
+          />
           <Button type="submit" disabled={form.formState.isSubmitting}>
             <Search className="h-4 w-4" />
             Search
